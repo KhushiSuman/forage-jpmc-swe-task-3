@@ -10,9 +10,14 @@ interface IProps {
 
 interface PerspectiveViewerElement extends HTMLElement {
   load: (table: Table) => void,
+  setAttribute: (name: string, value: string) => void,
 }
+
 class Graph extends Component<IProps, {}> {
   table: Table | undefined;
+  historicalAverageRatio: number = 1.0; // Example historical average ratio
+  upperBound: number = this.historicalAverageRatio * 1.10; // +10%
+  lowerBound: number = this.historicalAverageRatio * 0.90; // -10%
 
   render() {
     return React.createElement('perspective-viewer');
@@ -25,7 +30,7 @@ class Graph extends Component<IProps, {}> {
     const schema = {
       stock: 'string',
       top_ask_price: 'float',
-      top_bid_price: 'float',
+      ratio: 'float', // Added for the ratio
       timestamp: 'date',
     };
 
@@ -38,11 +43,10 @@ class Graph extends Component<IProps, {}> {
       elem.setAttribute('view', 'y_line');
       elem.setAttribute('column-pivots', '["stock"]');
       elem.setAttribute('row-pivots', '["timestamp"]');
-      elem.setAttribute('columns', '["top_ask_price"]');
+      elem.setAttribute('columns', '["ratio"]');
       elem.setAttribute('aggregates', JSON.stringify({
         stock: 'distinctcount',
-        top_ask_price: 'avg',
-        top_bid_price: 'avg',
+        ratio: 'avg',
         timestamp: 'distinct count',
       }));
     }
@@ -53,7 +57,28 @@ class Graph extends Component<IProps, {}> {
       this.table.update(
         DataManipulator.generateRow(this.props.data),
       );
+
+      // Check for bounds and show alert if needed
+      this.table.to_json().then((data) => {
+        data.forEach(row => {
+          if (row.ratio > this.upperBound || row.ratio < this.lowerBound) {
+            this.showAlert("Alert: Ratio out of bounds!");
+          }
+        });
+      });
     }
+  }
+
+  showAlert(message: string) {
+    const alertElement = document.createElement('div');
+    alertElement.className = 'alert';
+    alertElement.textContent = message;
+    document.body.appendChild(alertElement);
+
+    // Remove the alert after a few seconds
+    setTimeout(() => {
+      document.body.removeChild(alertElement);
+    }, 5000);
   }
 }
 

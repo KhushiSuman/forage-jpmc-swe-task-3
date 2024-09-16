@@ -2,11 +2,13 @@ export interface Order {
   price: number,
   size: number,
 }
+
 export interface ServerRespond {
   stock: string,
   top_bid: Order,
   top_ask: Order,
   timestamp: Date,
+  ratio?: number, // Added optional ratio field
 }
 
 class DataStreamer {
@@ -18,9 +20,17 @@ class DataStreamer {
 
     request.onload = () => {
       if (request.status === 200) {
-        callback(JSON.parse(request.responseText));
+        const data: ServerRespond[] = JSON.parse(request.responseText);
+
+        // Add ratio calculation here
+        const dataWithRatio = data.map(item => ({
+          ...item,
+          ratio: item.top_ask.price / item.top_bid.price // Calculate ratio
+        }));
+
+        callback(dataWithRatio);
       } else {
-        alert ('Request failed');
+        alert('Request failed');
       }
     }
 

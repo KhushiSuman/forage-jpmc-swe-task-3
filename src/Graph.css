@@ -1,4 +1,23 @@
+/* Styles for perspective-viewer */
 perspective-viewer {
   height: 50vh;
   width: 700px;
+  border: 1px solid #ccc; /* Optional: Adds a border to the graph */
+  border-radius: 8px; /* Optional: Rounds the corners of the border */
+  margin: 0 auto; /* Optional: Centers the graph horizontally */
+}
+
+/* Styles for alert messages */
+.alert {
+  padding: 15px;
+  margin: 10px;
+  border: 1px solid #f5c6cb;
+  border-radius: 5px;
+  background-color: #f8d7da;
+  color: #721c24;
+  font-weight: bold;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
 }
